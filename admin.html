@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#09091a">
+<title>Orihime MD — Admin</title>
+<style>
+  :root{--bg:#080816;--panel2:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);--pink:#ff73c8;--pink2:#b46cff;--text:#fff;--muted:#bbb5cf;--good:#70f2bb;--warn:#ffd36e;--danger:#ff7a8d;--shadow:0 24px 80px rgba(0,0,0,.45)}
+  *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+  .shell{width:min(980px,92vw);margin:0 auto;padding:26px 0 60px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 0 22px}
+  .brand{display:flex;align-items:center;gap:12px}.brand-badge{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:linear-gradient(135deg,var(--pink),var(--pink2));font-size:20px}
+  .brand h1{font-size:17px;margin:0}.brand small{display:block;color:var(--muted);margin-top:2px}
+  a.back{color:var(--muted);font-size:12px;text-decoration:none;border:1px solid var(--line);padding:8px 12px;border-radius:12px}
+  .card{background:linear-gradient(180deg,rgba(27,25,49,.74),rgba(11,10,27,.70));border:1px solid var(--line);box-shadow:var(--shadow);border-radius:22px;padding:26px}
+  .center{min-height:60vh;display:grid;place-items:center}
+  .lock{width:min(380px,90vw);text-align:center}
+  .lock h2{margin:0 0 6px;font-size:22px}
+  .lock p{color:var(--muted);font-size:13px;margin:0 0 18px}
+  input[type=password],input[type=text]{width:100%;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:#fff;padding:12px 14px;font:inherit;outline:none}
+  input:focus{border-color:rgba(255,115,200,.6);box-shadow:0 0 0 3px rgba(255,115,200,.1)}
+  .btn{border:0;border-radius:12px;padding:11px 16px;font-weight:800;cursor:pointer;color:#fff;transition:.15s transform}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.primary{background:linear-gradient(135deg,var(--pink),#8d6bff);width:100%;margin-top:12px}
+  .btn.ghost{background:rgba(255,255,255,.08);border:1px solid var(--line)}
+  .btn.small{padding:7px 10px;font-size:12px;border-radius:9px}
+  .btn.danger{background:rgba(255,90,117,.16);border:1px solid rgba(255,122,141,.35);color:#ffd6dd}
+  .btn.danger.solid{background:linear-gradient(135deg,#ff5a75,#c2405a);border:0;color:#fff}
+  .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+  .err{color:var(--danger);font-size:12px;min-height:16px;margin-top:10px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+  .stat{padding:16px;border-radius:16px;background:var(--panel2);border:1px solid var(--line)}
+  .stat .label{color:var(--muted);font-size:11px}.stat .value{font-size:26px;font-weight:900;margin-top:6px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.06em}
+  td.actions{display:flex;gap:6px;flex-wrap:wrap}
+  .pill{padding:5px 9px;border-radius:999px;border:1px solid var(--line);font-size:10px}
+  .pill.good{color:#a8ffd9;border-color:rgba(112,242,187,.3)}
+  .pill.warn{color:#ffe7a3;border-color:rgba(255,211,110,.3)}
+  .pill.bad{color:#ffd0d8;border-color:rgba(255,122,141,.3)}
+  .section{margin-top:20px}
+  .section h3{margin:0 0 12px;font-size:15px}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .danger-zone{border:1px solid rgba(255,122,141,.3);background:rgba(255,90,117,.06);border-radius:18px;padding:18px;margin-top:26px}
+  .danger-zone h3{color:#ffb9c4;margin:0 0 6px}
+  .danger-zone p{color:var(--muted);font-size:12px;line-height:1.6;margin:0 0 14px}
+  .muted{color:var(--muted);font-size:12px}
+  .toast{position:fixed;right:18px;bottom:18px;max-width:340px;padding:14px 16px;border-radius:16px;background:rgba(17,15,31,.95);border:1px solid var(--line);box-shadow:var(--shadow);transform:translateY(24px);opacity:0;pointer-events:none;transition:.25s}
+  .toast.show{transform:none;opacity:1}
+  .toast b{display:block;font-size:13px}.toast span{display:block;font-size:11px;color:var(--muted);margin-top:4px}
+  .hidden{display:none !important}
+  @media(max-width:700px){.grid{grid-template-columns:1fr 1fr}table{font-size:11px}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="topbar">
+    <div class="brand"><div class="brand-badge">🛠</div><div><h1>Orihime MD</h1><small>Admin panel</small></div></div>
+    <a class="back" href="/">← Back to site</a>
+  </div>
+
+  <div id="lockScreen" class="center">
+    <div class="card lock">
+      <h2>Admin access</h2>
+      <p>Enter the admin password to continue.</p>
+      <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
+      <button class="btn primary" id="unlockBtn">Unlock</button>
+      <div class="err" id="lockErr"></div>
+    </div>
+  </div>
+
+  <div id="dashboard" class="hidden">
+    <div class="grid">
+      <div class="stat"><div class="label">Linked sessions</div><div class="value" id="statUsers">–</div></div>
+      <div class="stat"><div class="label">Connected</div><div class="value" id="statConnected">–</div></div>
+      <div class="stat"><div class="label">Storage backend</div><div class="value" id="statStorage" style="font-size:16px">–</div></div>
+    </div>
+
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:14px">
+        <h3 style="margin:0">Sessions</h3>
+        <div class="row">
+          <button class="btn ghost small" id="refreshBtn">↻ Refresh</button>
+          <button class="btn ghost small" id="resyncBtn">🔧 Fix webhook secrets</button>
+          <button class="btn ghost small" id="logoutBtn">Log out</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Session</th><th>Status</th><th>Owner</th><th>Mode</th><th>Engine</th><th>Actions</th></tr></thead>
+          <tbody id="sessionRows"><tr><td colspan="6" class="muted">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="danger-zone">
+      <h3>⚠ Wipe all sessions</h3>
+      <p>Logs out and deletes <b>every</b> linked WhatsApp session on the bot, then clears all local session and group-settings records. Everyone currently linked will have to re-pair from scratch. This cannot be undone.</p>
+      <div class="row">
+        <input type="text" id="wipeConfirmInput" placeholder="Type WIPE to confirm" style="max-width:220px">
+        <button class="btn danger solid" id="wipeBtn">Wipe ALL sessions</button>
+      </div>
+    </div>
+  </div>
+</main>
+<div class="toast" id="toast"><b id="toastTitle"></b><span id="toastBody"></span></div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const TOKEN_KEY = 'orihime_admin_token';
+
+  function toast(title, body){
+    $('toastTitle').textContent = title;
+    $('toastBody').textContent = body || '';
+    const el = $('toast');
+    el.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => el.classList.remove('show'), 4200);
+  }
+
+  function token(){ return sessionStorage.getItem(TOKEN_KEY) || ''; }
+
+  async function api(path, opts = {}) {
+    const res = await fetch(path, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token() ? { Authorization: 'Bearer ' + token() } : {}),
+        ...(opts.headers || {})
+      }
+    });
+    let data = {};
+    try { data = await res.json(); } catch {}
+    if (res.status === 401) {
+      sessionStorage.removeItem(TOKEN_KEY);
+      showLock();
+      throw new Error(data.error || 'Session expired, please log in again.');
+    }
+    if (!res.ok) throw new Error(data.error || ('Request failed (' + res.status + ')'));
+    return data;
+  }
+
+  function showLock(){
+    $('lockScreen').classList.remove('hidden');
+    $('dashboard').classList.add('hidden');
+  }
+  function showDashboard(){
+    $('lockScreen').classList.add('hidden');
+    $('dashboard').classList.remove('hidden');
+    loadOverview();
+  }
+
+  async function unlock(){
+    const password = $('passwordInput').value;
+    $('lockErr').textContent = '';
+    $('unlockBtn').disabled = true;
+    try{
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Login failed');
+      sessionStorage.setItem(TOKEN_KEY, data.token);
+      $('passwordInput').value = '';
+      showDashboard();
+    }catch(e){
+      $('lockErr').textContent = e.message;
+    }finally{
+      $('unlockBtn').disabled = false;
+    }
+  }
+
+  function statusPillClass(status){
+    const s = String(status || '').toUpperCase();
+    if (s === 'WORKING') return 'good';
+    if (s === 'FAILED') return 'bad';
+    return 'warn';
+  }
+
+  function renderSessions(sessions){
+    if (!sessions.length){
+      $('sessionRows').innerHTML = '<tr><td colspan="6" class="muted">No sessions yet.</td></tr>';
+      return;
+    }
+    $('sessionRows').innerHTML = sessions.map((s) => `
+      <tr>
+        <td>${s.name}${s.removed ? ' <span class="pill bad">removed</span>' : ''}</td>
+        <td><span class="pill ${statusPillClass(s.status)}">${s.status || 'UNKNOWN'}</span></td>
+        <td class="muted">${s.ownerJid || '—'}</td>
+        <td class="muted">${s.mode || '—'}</td>
+        <td class="muted">${s.engine || '—'}</td>
+        <td class="actions">
+          <button class="btn ghost small" data-action="restart" data-session="${s.name}">Restart</button>
+          <button class="btn danger small" data-action="remove" data-session="${s.name}">Remove</button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async function loadOverview(){
+    try{
+      const data = await api('/api/admin/overview');
+      $('statUsers').textContent = data.userCount;
+      $('statConnected').textContent = data.connectedCount;
+      $('statStorage').textContent = data.storageBackend;
+      renderSessions(data.sessions || []);
+    }catch(e){
+      toast('Could not load sessions', e.message);
+    }
+  }
+
+  $('sessionRows').addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const session = btn.dataset.session;
+    const action = btn.dataset.action;
+    if (action === 'remove' && !confirm(`Remove session "${session}"? This logs it out and deletes it.`)) return;
+    btn.disabled = true;
+    try{
+      await api(`/api/admin/sessions/${encodeURIComponent(session)}/${action}`, { method: 'POST' });
+      toast(action === 'restart' ? 'Session restarted' : 'Session removed', session);
+      await loadOverview();
+    }catch(e){
+      toast('Action failed', e.message);
+    }finally{
+      btn.disabled = false;
+    }
+  });
+
+  $('unlockBtn').addEventListener('click', unlock);
+  $('passwordInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') unlock(); });
+  $('refreshBtn').addEventListener('click', loadOverview);
+  $('logoutBtn').addEventListener('click', async () => {
+    try{ await api('/api/admin/logout', { method: 'POST' }); }catch{}
+    sessionStorage.removeItem(TOKEN_KEY);
+    showLock();
+  });
+  $('resyncBtn').addEventListener('click', async () => {
+    $('resyncBtn').disabled = true;
+    try{
+      const data = await api('/api/admin/resync-webhooks', { method: 'POST' });
+      const failed = (data.results || []).filter((r) => !r.ok);
+      toast('Webhook resync done', failed.length ? `${failed.length} session(s) failed` : 'All sessions updated');
+    }catch(e){
+      toast('Resync failed', e.message);
+    }finally{
+      $('resyncBtn').disabled = false;
+    }
+  });
+  $('wipeBtn').addEventListener('click', async () => {
+    if ($('wipeConfirmInput').value.trim().toUpperCase() !== 'WIPE') {
+      return toast('Type WIPE to confirm', 'This safety check prevents accidental wipes.');
+    }
+    if (!confirm('This will permanently remove EVERY linked WhatsApp session. Continue?')) return;
+    $('wipeBtn').disabled = true;
+    try{
+      const data = await api('/api/admin/wipe-all', { method: 'POST' });
+      toast('All sessions wiped', `${data.storeSessionsCleared} session record(s) cleared`);
+      $('wipeConfirmInput').value = '';
+      await loadOverview();
+    }catch(e){
+      toast('Wipe failed', e.message);
+    }finally{
+      $('wipeBtn').disabled = false;
+    }
+  });
+
+  if (token()) showDashboard(); else showLock();
+</script>
+</body>
+</html>
