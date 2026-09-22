@@ -61,8 +61,4 @@ that part survives a redeploy or spin-down. Two things still don't:
 - **WAHA's own WhatsApp auth state** (`/app/.sessions`) — a spin-down/redeploy
   can still force a re-pair, same as before. A Render persistent disk mounted
   at that path removes this limitation if you need it.
-- **Locally cached channel command images** (`data/channel-media/`) — these
-  are downloaded copies of whatever you post to the Orihime channel. If wiped,
-  the backend automatically re-syncs them from the channel the next time a
-  session reconnects, so this self-heals but can cause a brief window where a
-  command reply falls back to plain text instead of an image.
+- **Command images** are committed individually at repository root and are copied into every Docker deploy. They do not depend on a WhatsApp Channel, channel history, or background synchronization.
