@@ -1,0 +1,138 @@
+# All Orihime source files (server.js, bot.js, waha.js, etc.) must be at repository root.
+databases:
+  # Free Render Postgres. This is what makes linked sessions, group settings
+  # and command history survive redeploys — without it the backend falls
+  # back to a local JSON file that Render wipes on every deploy.
+  - name: orihime-db
+    plan: free
+    region: frankfurt
+    databaseName: orihime
+    user: orihime
+
+services:
+  # Free Render Key Value (Redis-compatible) instance. Command history is
+  # written here instead of Postgres so a busy session's logging can't pile
+  # up in the same write queue as every other session's — see store.js.
+  # noeviction keeps it acting like a real log instead of a cache that can
+  # silently drop entries under memory pressure.
+  - type: keyvalue
+    name: orihime-redis
+    plan: free
+    region: frankfurt
+    maxmemoryPolicy: noeviction
+    ipAllowList: [] # only reachable from other services in this account
+
+  - type: web
+    name: orihime-md
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: orihime-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: orihime-redis
+          property: connectionString
+      - key: BOT_OWNER_PHONE
+        sync: false
+      - key: WAHA_API_KEY
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      - key: GEMINI_TIMEOUT_MS
+        value: "90000"
+      - key: RAPIDAPI_KEY
+        sync: false
+      - key: RAPIDAPI_YOUTUBE_HOST
+        value: youtube-media-downloader.p.rapidapi.com
+      - key: RAPIDAPI_YOUTUBE_SEARCH_PATH
+        value: /v2/search/videos
+      - key: RAPIDAPI_YOUTUBE_DOWNLOAD_PATH
+        value: /v2/video/details
+      - key: RAPIDAPI_YOUTUBE_SEARCH_PARAM
+        value: keyword
+      - key: RAPIDAPI_YOUTUBE_DOWNLOAD_PARAM
+        value: videoId
+      - key: WEBHOOK_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: WHATSAPP_ENGINE
+        value: GOWS
+      - key: WHATSAPP_DEFAULT_ENGINE
+        value: GOWS
+      - key: RUN_LOCAL_WAHA
+        value: "true"
+      - key: MAX_ACTIVE_SESSIONS
+        value: "1"
+      - key: MEDIA_MAX_CONCURRENT
+        value: "1"
+      - key: MAX_MEDIA_BYTES
+        value: "52428800"
+      - key: VIEWONCE_CACHE_MAX
+        value: "8"
+      - key: VIEWONCE_CACHE_TTL_MS
+        value: "600000"
+      - key: VIEWONCE_CACHE_MAX_BYTES
+        value: "20971520"
+      - key: WEB_PREVIEW_ENABLED
+        value: "true"
+      - key: WAHA_URL
+        value: http://127.0.0.1:3000
+      - key: WHATSAPP_API_PORT
+        value: "3000"
+      - key: WHATSAPP_API_HOSTNAME
+        value: 127.0.0.1
+      - key: WAHA_EVENTS_DOWNLOAD_MEDIA
+        value: "true"
+      - key: WAHA_API_DOWNLOAD_MEDIA
+        value: "true"
+      - key: WAHA_EVENTS_DOWNLOAD_MEDIA_MIMETYPES
+        value: image,video,audio
+      - key: WAHA_API_DOWNLOAD_MEDIA_MIMETYPES
+        value: image,video,audio
+      - key: WAHA_LOCAL_STORE_BASE_DIR
+        value: /app/.sessions
+      - key: WHATSAPP_FILES_FOLDER
+        value: /app/.media
+      - key: WHATSAPP_FILES_LIFETIME
+        value: "0"
+      - key: WAHA_PRINT_QR
+        value: "false"
+      - key: WAHA_WORKER_RESTART_SESSIONS
+        value: "true"
+      - key: WHATSAPP_RESTART_ALL_SESSIONS
+        value: "true"
+      - key: KEEPALIVE_INTERVAL_MS
+        value: "600000"
+      - key: WAHA_DASHBOARD_ENABLED
+        value: "false"
+      - key: WHATSAPP_SWAGGER_ENABLED
+        value: "false"
+      - key: SESSION_WATCH_INTERVAL_MS
+        value: "30000"
+      - key: TEMP_MESSAGE_DELAY_MS
+        value: "350"
+      - key: ANTIBOT_SCORE_THRESHOLD
+        value: "10"
+      - key: ANTIBOT_MODERATE_ADMINS
+        value: "false"
+      - key: ANTIBOT_WARN
+        value: "false"
+      - key: DANCE_FRAME_MS
+        value: "120"
+      - key: MAX_ANIMATION_FRAMES
+        value: "24"
+      - key: WAHA_READY_TIMEOUT_S
+        value: "120"
+      - key: TRUST_PROXY
+        value: "false"
