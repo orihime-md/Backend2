@@ -2350,7 +2350,7 @@ async function executeCommand({ session, chatId, from, parsed, payload, isOwner 
       }
 
       // .grow-gc has its own batch size (default 50); .split-gc keeps SPLIT_GC_BATCH_SIZE.
-      const batchSize = Math.max(1, Number(process.env.GROW_GC_BATCH_SIZE || 500));
+      const batchSize = Math.max(1, Number(process.env.GROW_GC_BATCH_SIZE || 50));
       await sendText(session, chatId,
         `🚀 Adding ${numbers.length} contacts in batches of ${batchSize}.` +
         (skippedExisting ? `\n⏭️ Already in group: ${skippedExisting}` : '') +
